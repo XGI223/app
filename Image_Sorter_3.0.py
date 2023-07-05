@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import shutil
 import cv2
 import time
+import imutils
 
 window = tk.Tk()
 window.title("Media Sorter")
@@ -16,6 +17,9 @@ window.geometry("800x900")
 source_path = ""
 destination_folders = []
 media_files = []
+
+label = None
+button_frame = None
 
 def add_source_folder():
     try:
@@ -43,7 +47,7 @@ def remove_destination_folder():
         destination_folders.pop(selected[0])
 
 def run():
-    global media_files
+    #global media_files
     media_files = []
 
     if not source_path_entry.get():
@@ -61,8 +65,8 @@ def run():
     else:
         mb.showinfo("No media found", "There are no media files in the selected folder.")
 
-def display_media(media_path, index, button_index):
-    global label, button_frame
+def display_media(media_path, index, button_index, label=label, button_frame=button_frame):
+    #global label, button_frame
     if label is not None:
         label.grid_forget()
     if button_frame is not None:
@@ -90,8 +94,9 @@ def display_media(media_path, index, button_index):
 
 ...
 
-def display_video(video_path, index):  # Add index as a parameter
-    global label, button_frame, width, height, video
+def display_video(video_path, index, label=label, button_frame=button_frame):  # Add index as a parameter
+    #global label, button_frame, width, height, video
+
     if label is not None:
         label.grid_forget()
     if button_frame is not None:
@@ -121,12 +126,16 @@ def display_video(video_path, index):  # Add index as a parameter
         button_index += 1
     
 
+    # TODO: change cv2 to use MoviePy instead
     def update_frame():
         if not paused:
             ret, frame = video.read()
             if ret:
+                win_width = window.winfo_width()
+                win_width = float(win_width)/float(350) * 100
+
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.resize(frame, (600, 600))
+                frame = imutils.resize(frame, int(win_width))  #cv2.resize(frame, (width, height))
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 label.configure(image=image)
@@ -151,7 +160,7 @@ def display_video(video_path, index):  # Add index as a parameter
     update_frame()
 
 def move_media(media_path, destination_folder, index, button_index):
-    global video
+    #global video
     
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
@@ -167,8 +176,8 @@ def move_media(media_path, destination_folder, index, button_index):
             return
 
     # Stop video playback (if applicable)
-    if media_path.endswith(".mp4"):
-        video.release()
+    #if media_path.endswith(".mp4"):
+    #    video.release()
 
     time.sleep(0.1)  # Add a small delay before moving the file
 
@@ -250,8 +259,6 @@ right_frame.grid_rowconfigure(5, weight=1)
 window.grid_columnconfigure(0, weight=1)
 window.grid_rowconfigure(0, weight=1)
 
-label = None
-button_frame = None
 #beans
 
 window.mainloop()
