@@ -252,5 +252,6 @@ window.grid_rowconfigure(0, weight=1)
 
 label = None
 button_frame = None
+#beans
 
 window.mainloop()
